@@ -26,5 +26,6 @@ The main code include mex files that are complied for Mac and Linux systems.
 ## Reference
 
 [1] Kim, M. and Or, D.: Hydration status and diurnal trophic interactions shape microbial community function in desert biocrusts, Biogeosciences, 14, 5403-5424, https://doi.org/10.5194/bg-14-5403-2017, 2017.
-[1] Kim, M. and Or, D.: Microscale pH variations in soils affect HONO and NH3 emissions while drying, in review, 2019.
+
+[2] Kim, M. and Or, D.: Microscale pH variations in soils affect HONO and NH3 emissions while drying, in review, 2019.
 
