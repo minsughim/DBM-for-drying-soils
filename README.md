@@ -3,6 +3,7 @@ This repository includes the source codes for desert biocrust model under dynami
 
 ## Usage
 
+
 To excute the main function (Main_BSC_biogeoscience.m), you need four input arguments;
 1. Time for the dynamics (examineDays)
 2. matric potentail for unsaturated soils (pot1, with the unit of [-kPa])
@@ -20,12 +21,14 @@ Main_BSC_biogeoscience(examineDay, pot1, plottt, indexS)
 
 ## Note
 
-The main code include mex files that are complied for Mac and Linux systems.
+1. The DBM is computationally very expensive and rather slow on local desktops. For instance, using 32 cores in a computing cluster requires 4-5 days to complete a single simulation with a following procedure; (1) inoculation of microbial cells at field capacity (-3kPa), (2) calculation of the pseudo-steady state of microbial activities at fully saturated conditions, (3) simulation of a dry condition under darkness, and (4) application of a wetting-drying cycle.
+
+2. The main code include mex files that are complied for Mac and Linux systems (tested on MATLAB 2018a)
 
 
 ## Reference
 
 [1] Kim, M. and Or, D.: Hydration status and diurnal trophic interactions shape microbial community function in desert biocrusts, Biogeosciences, 14, 5403-5424, https://doi.org/10.5194/bg-14-5403-2017, 2017.
 
-[2] Kim, M. and Or, D.: Microscale pH variations in soils affect HONO and NH3 emissions while drying, in review, 2019.
+[2] Kim, M. and Or, D.: Microscale pH variations in soils affect HONO and NH3 emissions during drying, in review, 2019.
 
