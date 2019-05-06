@@ -1,8 +1,12 @@
 # DBM-for-drying-soils
-This repository includes the source codes for desert biocrust model under dynamic hydration conditions 
+This repository includes the source codes for desert biocrust model under dynamic hydration conditions.
+The work is a continuation work of the DBM at a static hydration condition [1], (the main code for this work is in other repository can be run with Main_BSC_biogeoscience.m). 
+The model uses the output of Main_BSC_biogeoscience.m as an initial condition, used as the stabilised microbial communities under the given conditions, and the domain is under the dry and dark condition (for 3 days; enough to exhaust carbon sources and nitrification activity becomes dominant), then a wet-dry cycle (duration of 24 hours) is applied. 
+
+
+
 
 ## Usage
-
 
 To excute the main function (Main_BSC_biogeoscience.m), you need four input arguments;
 1. Time for the dynamics (examineDays)
