@@ -8,7 +8,7 @@ The main difference to the Main_BSC_biogeoscience.m is the dynamic update of hyd
 
 ## Usage
 
-### STEP 0. MATLAB Installation 
+### STEP 0. MATLAB Installation and download all files in the folder named 'codes'
 
 ### STEP 1. Inoculation of microbial cells at field capacity (-3kPa) 
 
