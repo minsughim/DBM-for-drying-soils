@@ -1,4 +1,4 @@
-function [sitesC2ini, sitesCaini, sitesCgini, sitesCini] = Main_single_noBio(PartialPressure,amountCations,avgT, initMoles)
+function [sitesC2ini, sitesCaini, sitesCgini, sitesCini] = Main_single_noBio(PartialPressure,amountCations,avgT)
 rng('shuffle')
 
 %To calcauted initial condition for the steady state condition
@@ -7,6 +7,7 @@ pot1 = 3;
 plottt = 5;
 dryingT = 0;
 frac = 0.01;
+initMoles = 1;
 
 %Zratio = 0.5; %nut pH = 7.5;
 Zratio = amountCations; %nut pH = 7.5;

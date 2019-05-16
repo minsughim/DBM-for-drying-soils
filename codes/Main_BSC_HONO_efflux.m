@@ -13,9 +13,7 @@ global iniConcentrationGas iniConcentration
 %examineDay = 1; %Time for the dynamics (given in days)
 %initMoles = 0.1;
 %pot1 = 3; % matric potential for unsaturated soils, with the unit of [-kPa]
-
 plottt = 5; % This value is for saving. dt*plottt is the time interval. As dt is given as 60 sec below, plottt = 5 would save variables for every 5 mins.
-
 %indexS = 0; %index for ensemble averages
 %maximumThreadt = feature('numcores'); %number of cores for the parallel computing
 

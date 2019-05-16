@@ -1,76 +1,50 @@
-function Main_BSC_photoY_drying3_WaterShortDecay_NH3_HONO_Temperature(NH3ppb, HONOppb, lightOn2,examineDay,desiccationIndex,avgT, newT, pot1, plottt, indexS,maximumThreadt)
+function Main_BSC_immerse(lightOn,examineDay,examineDay2 pot1, plottt, indexS)
 rng('shuffle')
 
-dryingT = 1; % 24 hours of drying for all in this code
+%to call the simulation results
+%examineDay = 5; %Time for the dynamics (given in days)
+%pot1 = 3; % matric potential for unsaturated soils, with the unit of [-kPa]
+%plottt = 5; % This value is for saving. dt*plottt is the time interval. As dt is given as 60 sec below, plottt = 5 would save variables for every 5 mins.
+%indexS = 0; %index for ensemble averages
+maximumThreadt = feature('numcores'); %number of cores for the parallel computing
+
+%examineDay2 = 5; % Time for the dynamics for full saturation, how many days to immerse the soil system in water? 
+%lightOn = 0; % 0 for complete darkness, 1 for complete brightness, these
+%two conditions are artificialm and the temperature variation will be off
+%as well.
+
+%anyother numbers will make diurnal cycle (sinosoidal, starting from
+%sunrise:: see Biogeosceince papaer)
 
 global m n Rad3 Rad3Over2 dt Lp dl patchArea  R1 R2 %modelling parameters
 global V0 chi0 mumax Ks Ymax mrate Vu R rho % prameters for microbes
-global dataPoints ed listE numberOFN numberOFP testMinT Hurst
+global dataPoints ed listE numberOFN numberOFP testMinT
 global averageT amplitudeT attenuationRate MaximumIncidence repsiRatio
 global iniConcentrationGas iniConcentration
 
-% examineDay =5;
-% desiccationIndex = 4;
-% NfixationR = 0.1;
-pCO2frac = 1;
-amountCations = 0.1;
-% avgT = 25;
-peneD = 0.2;
-% pot1 = 3;
-% plottt = 5;
-% indexS = 9;
-alphaCO = 3;
-% maximumThreadt = 2;
-% lightOn2 = 0;
-% HONOppb = 0.1;
-
-serial_id_new = sprintf('HT_BSC_photoY3_Day%dPot%.1fpCO2frac%dCat%.1favT%dAlphaCO%dfindex%d',examineDay,pot1,pCO2frac,amountCations,avgT,alphaCO, indexS);
+serial_id_new = sprintf('HT_BSC_Day%d_Pot%.1f_index%d',examineDay,pot1,indexS);
 cd(serial_id_new);
-serial_idtemp_dd = sprintf('Dinural_cycle');
-cd(serial_idtemp_dd);
 load('Final.mat')
-cd ..
-if lightOn2 == 1
-    serial_idtemp = sprintf('Constant_light_water_lineardecay_newT%d_NH3%d_HONO%d_Drying%d_varyingT', newT,NH3ppb,HONOppb,desiccationIndex);
+if lightOn == 1   
+    serial_idtemp = sprintf('Constant_light');
     amplitudeT = 0; %experiemnt with the constnat condition (with average velocity and maximum incidence of light)
-    averageT = newT; %[degree C]
-else if lightOn2 == 0
-        serial_idtemp = sprintf('Constant_dark_water_lineardecay_newT%d_NH3%d_HONO%d_Drying%d_varyingT', newT, NH3ppb,HONOppb,desiccationIndex);
+else if lightOn == 0
+        serial_idtemp = sprintf('Constant_dark');
         amplitudeT = 0; %experiemnt with the constnat condition (with average velocity and maximum incidence of light)
-        averageT = newT; %[degree C]
-    else if lightOn2 == 0.5
-            serial_idtemp = sprintf('Dinural_cycle_water_lineardecay_newT%d_NH3%d_HONO%d_Drying%d_varyingT',newT, NH3ppb,HONOppb,desiccationIndex);
-            averageT = newT; %[degree C]
-            
-        else
-            serial_idtemp = sprintf('Dark_Tcycle_water_lineardecay_newT%d_NH3%d_HONO%d_Drying%d_varyingT',newT, NH3ppb,HONOppb,desiccationIndex);
-            averageT = newT; %[degree C]
-            
-        end
+    else
+        serial_idtemp = sprintf('Dinural_cycle');
     end
 end
 mkdir(serial_idtemp);
 cd ..
-%% Changes in water requiredment for phototrophs
-Parameters_Modification_water_shortage
 
-%% Recalculate the equilibrium with new mixing ratio
-
-pN2 = 0.7809;
-pO2 = 0.2095;
-pCO2 = 0.000383*pCO2frac; %383 ppm
-pNH3 = NH3ppb*10^(-9); %default: 5ppb: Gong et al 2011 %2ppb in McCally
-pHONO = HONOppb*10^(-9); %1ppb for HONO : Su et al 2011 from dry area
-pN2O = 5*10^(-7); %mg/L %500ppb (0.5ppm) for N2O
-PartialPressure =[pO2,pCO2,0,0,0,pNH3,pHONO,pN2O,pN2];
-
-[sitesC2ini, sitesCaini, sitesCgini, sitesCini] = Main_single_noBio(PartialPressure,amountCations,avgT);
-
-%% Drying
-examineDay = dryingT;
-reducedLevelC = 10^(-16); %to start with zero input from bottom, it increases slowly depending on the hydration condition
+%%% Wetting for <examineDay2> days (immersed in water)
+examineDay = examineDay2;
+reducedLevelC = 10^(-16);
 satuIndex = 0; % saturation index 1: indicating completely saturated case, saturation index 0: indicating field capacit corresponds to 0.66 saturation condition
+
 repsiRatio = 0.1; %
+
 Zratio = amountCations; %nut pH = 7.5;
 Zion = Zratio*100*10^(-3)/40; %in mol/L (net ion concentration that t
 calciumF = amountCations;
@@ -87,27 +61,13 @@ P_a = 1.4;
 %% Time information for the fixed time step
 dt = 60; %second %1 min.
 testMinT = 0.1; % second: diffusion equation resolution of 1 second.
-
-examineH = dryingT*24 + 24*5; %sustain as the dry soil one more day
+examineH = 24*examineDay;
+%timeLine = 0:(dt*plottt)/3600:examineH;
 timeLine = (dt*plottt)/3600:(dt*plottt)/3600:examineH;
-TinitalD = 4*(3600/dt)*24; %examine time, (seconds)*hours
 T = (3600/dt)*examineH; %examine time, (seconds)*hours
-Td = (3600/dt)*dryingT*24; %examine time, (seconds)*hours
 dataPoints = T/plottt;
 timeLapseList = zeros(dataPoints,1);
 DeltaT = dt;
-preDryHlist = TinitalD/plottt;
-dryPot = 50;
-DryHlist = Td/plottt;
-load('Dessication_Biocrust.mat', 'potListTotal')
-potList(1:DryHlist) = potListTotal(:,desiccationIndex);
-%potList = linspace(0.5,30,dataPoints);
-%desiccationLevel = drypot2;
-%potList = linspace(0.5,desiccationLevel,DryHlist);
-%potList = linspace(0.5,30,dryingT*24);
-
-
-
 %% Preallocate variables
 endIndex = length(Mumean);
 clear Mumean
@@ -115,8 +75,6 @@ clear Mumean
 popWalkers = zeros(dataPoints,numberOFP);
 dormpopWalkers = zeros(dataPoints,numberOFP);
 totalBioMass = zeros(dataPoints,numberOFP);
-muSp = zeros(m,n,numberOFP);
-
 
 ActivityCells = cell(numberOFP,dataPoints);
 Mumean= zeros(dataPoints,numberOFP);
@@ -134,12 +92,6 @@ sitesNg = cell(numberOFN,1); %concentration of nutrients
 reactionC = zeros(m,n,numberOFN+3);
 totalNutri = zeros(dataPoints,numberOFN);
 
-avgWF = zeros(dataPoints,1);
-avgWC = zeros(dataPoints,1);
-avgWS = zeros(dataPoints,1);
-avgGC = zeros(dataPoints,1);
-
-
 for i = 1:8
     sitesN{i} = sitesC{i}.*waterVolume;
 end
@@ -153,47 +105,22 @@ sitesCaN2 = sitesCa(:,:,2).*waterVolume;
 
 %% Assinging the property of soil necessary
 %water film thickness and matric potentialfor different depth.
-pot1 = dryPot;
+pot1 = 0.5;
 pot = -pot1/9.81;
-[waterFilm,percolProb,waterSatu,capilaryPored,sepecifInterA,LengthList] = WaterDistAffineHTSatuAProfile(systemAffine,pot,Hurst,R1,R2,R);
+EpsD = capilaryPored;
+waterFilm = TotalporeD;
 [microbeVelocityM, probOccup] = velocityMicrobeMatrix2(waterFilm, pot,V0,R);
 perShare = ones(m,n);
 waterVolume = waterFilm*patchArea; %Volume  of water
-LocalWaterContents = waterFilm./totaldM;
-LocalWaterSaturation = LocalWaterContents./porosityM;
-LocalGasContents = porosityM-LocalWaterContents;
+LocalWaterContents = porosityM;
+LocalWaterSaturation = ones(m,n);
+LocalGasContents = zeros(m,n);
 Aqdiff = (LocalWaterContents.^(10/3)).*porosityM.^(-2);
-%Aqdiff = ones(m,n);
-localDiffG = 10^4*(LocalGasContents.^(10/3)).*porosityM.^(-2);
-gasVolume = LocalGasContents.*totaldM*patchArea; %Volume of water
-
-%% For boundary conditions
-[realIsland,town2,results2,numberOfCluster] = IslandStatHex(LocalGasContents,0.2); %Invasive percolation for BCC case Pc = 0.2
-
-listInvasionBottom =realIsland(end,:);
-ListLocation = find(listInvasionBottom);
+localDiffG = zeros(m,n);
+gasVolume = zeros(m,n); %Volume of water
 InvasedIsland = zeros(m,n);
-for i = 1:length(ListLocation)
-    IslandIndex = listInvasionBottom(ListLocation(i));
-    InvasedIsland(realIsland==IslandIndex) = reducedLevelC;
-end
-InvasedIsland(end,:) = reducedLevelC;
-
-listInvasion =realIsland(1,:);
-ListLocation = find(listInvasion);
-for i = 1:length(ListLocation)
-    IslandIndex = listInvasion(ListLocation(i));
-    InvasedIsland(realIsland==IslandIndex) = 1;
-end
 InvasedIsland(1,:) = 1;
-
-ListUnsatu = find(waterSatu<1);
-if isempty(ListUnsatu)==1
-    exRatewithoutDiff =zeros(m,n);
-else
-    exRatewithoutDiff = ((localDiffG./(1-LocalWaterSaturation))-(Aqdiff./LocalWaterSaturation)).*sepecifInterA./TotalporeD;
-end
-
+exRatewithoutDiff = zeros(m,n);
 MaxCapacityPop = capilaryPored.*patchArea/Vdmin;
 
 lambdaMatrix = ((1-porosityM)/2.9 + LocalWaterContents/0.57 + LocalGasContents/0.0012).^(-1);%Soil Thermal conductivity [W/mK]
@@ -201,10 +128,10 @@ CvMatrix = 10^(6)*(1.94*(1-porosityM)+4.189*LocalWaterContents+ 0.0012*LocalGasC
 alphaMatrix = lambdaMatrix./CvMatrix; %Soil Thermal diffusivity[m^2/s]
 
 %% Determine Light conditions
-if lightOn2 == 0.5
+if lightOn == 0.5
     [intensityList,temperatureList,MumaxT, HenryConstList{1,1},HenryConstList{2,1},HenryConstList{6,1},HenryConstList{7,1},HenryConstList{8,1}, pKList,Density_air] = EnvironmentProfileDensityAirTmax(depthList,timeLine,alphaMatrix);
 else
-    [intensityList,temperatureList,MumaxT, HenryConstList{1,1},HenryConstList{2,1},HenryConstList{6,1},HenryConstList{7,1},HenryConstList{8,1}, pKList,Density_air] = ExperimentProfileDensityAir(depthList,timeLine,alphaMatrix,lightOn2);
+    [intensityList,temperatureList,MumaxT, HenryConstList{1,1},HenryConstList{2,1},HenryConstList{6,1},HenryConstList{7,1},HenryConstList{8,1}, pKList,Density_air] = ExperimentProfileDensityAir(depthList,timeLine,alphaMatrix,lightOn);
 end
 
 for i = 3:5
@@ -231,41 +158,15 @@ for i = 1:numberOFN%except sugar and EPS (initial condition for only CO2 and O2)
         sitesC2{i}(1,:) = 0;
     end
     sitesC{i} = sitesN{i}./waterVolume;
-    sitesCg{i,1} = PartialPressure(i)*rhoAir;
 end
 
 sitesC2{5} = -log10(sitesC2{4});
-%ZionM = ZionMN./waterVolume;
-%ZionM(1,:) = 0;
-%ZionM(end,:) = 0;
 sitesCa(:,:,1) = sitesCaN1./waterVolume;
 sitesCa(:,:,2) = sitesCaN2./waterVolume;
-%sitesCa(1,:,1) = 0;
-%sitesCa(end,:,1) = 0;
-%sitesCa(1,:,2) = 0;
-%sitesCa(end,:,2) = 0;
-
-%
-% % % Gaseous realted substrate concentration reset
-% sitesC{1} = iniConcentration(1)*ones(m,n); %oxygen
-%sitesC{2}(1,:) = iniConcentration(2); %CO2
-%sitesC{3}(1,:) = iniConcentration(2)*10^(-6.36+7)*Molwt(10)/Molwt(7); %HCO3- at pH 7
-% sitesC{3} = zeros(m,n); %HCO3- at pH 7
-% sitesC{4} = zeros(m,n); %CH2O
-% sitesC{5} = zeros(m,n); %NO3-
-% sitesC{7} = zeros(m,n); %NO2-
-% sitesC{8} = iniConcentration(8)*ones(m,n);%N2O
-%sitesC2{2}(1,:) = sitesC{3}(1,:)*10^(-10.33+7)*Molwt(12)/Molwt(10); %CO32- at pH 7
-%sitesC2{3}(1,:) = HenryConstList{6}(1,1)*iniConcentrationGas(6); %NH3
-%sitesC{6}(1,:) = sitesC2{3}(1,:)*10^(-7+9.68)*Molwt(3)/Molwt(11); %NH4+
-sitesC2{4} = 10^(-7)*ones(m,n); %H+
+sitesC2{4} = 10^(-7)*ones(m,n); %H+: initiallsed as neutral but, will be recalculated depending on the amounts of other chemical compounds
 sitesC2{5} = 7*ones(m,n); %pH
-% sitesC2{6} = sitesC2ini{6}*ones(m,n); %HONOeffluxList = zeros(dataPoints,5);
-
 
 effluxList = zeros(dataPoints,5);
-effluxList2 = zeros(dataPoints,5);
-
 ListGas = [1 2 6 7 8];
 AlphaM = cell(numberOFN,1);
 sitesNEquil = cell(numberOFN,1);
@@ -286,139 +187,9 @@ end
 tic
 
 day = 1
-%% Starting dynamics
-timeM = zeros(m,n);
 
+%% Starting dynamics
 for examineT = 1:dataPoints
-    if (examineT < preDryHlist + DryHlist+1)&&(examineT > preDryHlist)
-        t = (examineT-1)*plottt;
-        if rem(t, (60*60/dt)) == 0; %every hour change the matric potential.
-            exposedHours = ceil(t*dt/(60*60))+1
-        end
-        % change conditions
-        pot1 = potList(examineT-preDryHlist);
-        pot = -pot1/9.81;
-        parfor iInd = 1:m
-            [WF,percol] = WaterDistAffineHTSatuAProfile(systemAffine(iInd,:,:),pot,Hurst,R1,R2,R);
-            waterFilm(iInd,:) = WF(1,:);
-            percolProb(iInd,:) = percol(1,:);
-        end
-        
-        [microbeVelocityM, probOccup] = velocityMicrobeMatrix2(waterFilm, pot,V0,R);
-        perShare = percolProb*probOccup;
-        waterVolume = waterFilm*patchArea; %Volume  of water
-        LocalWaterContents = waterFilm./totaldM;
-        LocalWaterSaturation = LocalWaterContents./porosityM;
-        LocalGasContents = porosityM-LocalWaterContents;
-        Aqdiff = (LocalWaterContents.^(10/3)).*porosityM.^(-2);
-        localDiffG = 10^4*(LocalGasContents.^(10/3)).*porosityM.^(-2);
-        gasVolume = LocalGasContents.*totaldM*patchArea; %Volume of water
-        
-        % new boundary conditions
-        [realIsland,town2,results2,numberOfCluster] = IslandStatHex(LocalGasContents,0.2); %Invasive percolation for BCC case Pc = 0.2
-        
-        EpsilonG = mean(LocalGasContents(:));
-        Phi = mean(porosityM(:));
-        tau = log((2*EpsilonG*EpsilonG+0.04*EpsilonG)/Phi/Phi)/log(EpsilonG/Phi);
-        ThetaV = mean(LocalWaterContents(:));
-        denom = (Phi*Phi*(EpsilonG/Phi)^tau)/(EpsilonG+6.42e-3*ThetaV);
-        BreakThroughGas = zeros(m,n);
-        for i = 1:length(depthList)
-            loc = depthList(i)*1000;
-            timeM = timeM+town2*plottt*dt;
-            for j = 1:n
-                if timeM(i,j)==0;
-                    BreakThroughGas(i,j) = 0;
-                else
-                    BreakThroughGas(i,j) = erfc(loc./(0.23*denom*timeM(i,j)));
-                end
-            end
-        end
-        
-        InvasedIsland = town2.*BreakThroughGas;
-        for i = 1:numberOfCluster
-            ListLocation = find(realIsland==i);
-            InvasedIsland(ListLocation) = (gasVolume(ListLocation)'*InvasedIsland(ListLocation))/sum(gasVolume(ListLocation));
-        end
-        InvasedIsland(1,:) = 1;
-        
-        ListUnsatu = find(waterSatu<1);
-        if isempty(ListUnsatu)==1
-            exRatewithoutDiff =zeros(m,n);
-        else
-            exRatewithoutDiff = ((localDiffG./(1-LocalWaterSaturation))-(Aqdiff./LocalWaterSaturation)).*sepecifInterA./TotalporeD;
-        end
-        
-        lambdaMatrix = ((1-porosityM)/2.9 + LocalWaterContents/0.57 + LocalGasContents/0.0012).^(-1);%Soil Thermal conductivity [W/mK]
-        CvMatrix = 10^(6)*(1.94*(1-porosityM)+4.189*LocalWaterContents+ 0.0012*LocalGasContents); %Soil Thermal diffusivity[m^2/s]
-        alphaMatrix = lambdaMatrix./CvMatrix; %Soil Thermal diffusivity[m^2/s]
-    end
-    
-    
-    avgWF(examineT) = mean(waterFilm(:));
-    avgWC(examineT) = mean(LocalWaterContents(:));
-    avgWS(examineT) = mean(LocalWaterSaturation(:));
-    avgGC(examineT) = mean(LocalGasContents(:));
-    
-    
-    for i = 1:numberOFN%except sugar and EPS (initial condition for only CO2 and O2)
-        if i < 8
-            sitesC2{i} = sitesN2{i}./waterVolume;
-        end
-        sitesC{i} = sitesN{i}./waterVolume;
-    end
-    sitesC2{5} = -log10(sitesC2{4});
-    %ZionM = ZionMN./waterVolume;
-    sitesCa(:,:,1) = sitesCaN1./waterVolume;
-    sitesCa(:,:,2) = sitesCaN2./waterVolume;
-    
-    [intensityListH,temperatureList,MumaxT, HenryConstList{1,1},HenryConstList{2,1},HenryConstList{6,1},HenryConstList{7,1},HenryConstList{8,1}, pKList,Density_air] = EnvironmentProfileDensityAirTmax(depthList,timeLine(examineT),alphaMatrix);
-    
-    %% Reset Environmental conditions (Light and temperature -> growth rate accordingly)
-    
-    intensityList = (lightOn2~=0)*intensityListH + (lightOn2==1)*MaximumIncidence.*exp(-depthList/(attenuationRate));
-    intensityProfile = diag(intensityList(1,:))*ones(m,n);
-    MumaxTt(:,:) = diag(MumaxT(1,:))*ones(m,n);
-    thetaTC(:,:) = diag(temperatureList(1,:))*ones(m,n);
-    
-    pKTotList = zeros(m,n,6); %pK
-    for i = 1:6
-        pKTotList(:,:,i) = diag(pKList(1,:,i))*ones(m,n);
-    end
-    
-    for i = 3:5
-        HenryConstList{i,1} = zeros(1,m);
-    end
-    rhoAir = zeros(m,n);
-    for i = 1:n
-        rhoAir(:,i) = Density_air(1,:); %EPS
-    end
-    
-    
-    for iG = 1:length(ListGas)
-        gI = ListGas(iG);
-        for i = 1:n
-            temp2(:,i) = HenryConstList{gI,1}(1,:);
-            rhoAir(:,i) = Density_air(1,:); %EPS
-        end
-        HenryDomain{gI} = temp2;
-        AlphaM{gI} = temp2.*waterVolume + gasVolume;
-        sitesNGEquil{gI} = PartialPressure(gI)*rhoAir;
-        sitesNEquil{gI} = temp2.*sitesCg{gI,1};
-    end
-    %% water informaion update
-    tempwaterVolume = generateBCcylinderY(waterVolume);
-    tempWFm = tempwaterVolume/patchArea;
-    tempWFm(1:2,:) = tempWFm(1:2,:)./100; %top of the surface has lower effecive water film thickness
-    normWater = cell(m,n);
-    for y = 1:m
-        for x = 1:n
-            normWater{y,x} = WeightFactorWperiodCylinder(tempWFm(y:y+2,x:x+2),x,y);
-        end
-    end
-    for i = 1:numberOFN
-        totalNutriPart{i,1} = zeros(plottt,1);
-    end
     
     %% Population update
     PopulationMapS = cell(m,n);
@@ -440,23 +211,47 @@ for examineT = 1:dataPoints
     MumeanPart = zeros(plottt,numberOFP);
     wakeUpTemp = ones(m,n);
     
+    for iG = 1:length(ListGas)
+        gI = ListGas(iG);
+        for i = 1:n
+            temp2(:,i) = HenryConstList{gI,1}(examineT,:);
+            rhoAir(:,i) = Density_air(examineT,:); %EPS
+        end
+        HenryDomain{gI} = temp2;
+        AlphaM{gI} = temp2.*waterVolume + gasVolume;
+        sitesNGEquil{gI} = PartialPressure(gI)*rhoAir;
+        sitesNEquil{gI} = temp2.*sitesCg{gI,1};
+    end
+    %% water informaion update
+    tempwaterVolume = generateBCcylinderY(waterVolume);
+    tempWFm = tempwaterVolume/patchArea;
+    tempWFm(1:2,:) = tempWFm(1:2,:)./100; %top of the surface has lower effecive water film thickness
+    normWater = cell(m,n);
+    for y = 1:m
+        for x = 1:n
+            normWater{y,x} = WeightFactorWperiodCylinder(tempWFm(y:y+2,x:x+2),x,y);
+        end
+    end
+    for i = 1:numberOFN
+        totalNutriPart{i,1} = zeros(plottt,1);
+    end
+    
     totCsum = 0*totCsum;
     totNgsum = 0*totNgsum;
     changeN = 0*changeN ;
     reactionC = 0*reactionC;
     totNgBubble = 0*totNgBubble;
     
-    
     for tt = 1:plottt
         
         t = (examineT-1)*plottt + tt;
         
-        if rem(t, (24*60*60/dt)) == 0; %every 24 hours save
+        if rem(t, (12*60*60/dt)) == 0; %every 6 hours save
             exposedHours = t*dt/(60*60)
             serial_id3 = sprintf('HTBioCrustEPSCNcycleHour%d',exposedHours);
-            save(strcat('./',serial_id_new,'/',serial_idtemp,'/',serial_id3,'.mat'),'porosity','totaldM','LocalGasContents','listV','BioMassDist','GaseousEffluxBubbles','ActivityCells','popWalkers', 'dormpopWalkers', 'popMovie','dormpopMovie','totalBioMass','timeConcDist','timeConcDist2','effluxList','effluxList2','timeLine','sitesC','sitesC2', 'sitesCa','totNutConsumption', 'GaseousEffluxMicrobes', 'Mumean','dataPoints', 'totalNutri','exposedHours','Lp','m','n','numberOFP','numberOFN','averageT','depthList','dt','plottt','examineT', 'depthList','alphaMatrix','GaseousEffluxMicrobes','InvasedIsland','waterVolume','gasVolume','averageT', 'amplitudeT', 'attenuationRate', 'MaximumIncidence','iniConcentrationGas','sitesCg');
+            save(strcat('./',serial_id_new,'/',serial_idtemp,'/',serial_id3,'.mat'),'porosity','totaldM','LocalGasContents','listV','BioMassDist','GaseousEffluxBubbles','ActivityCells','popWalkers', 'dormpopWalkers', 'popMovie','dormpopMovie','totalBioMass','timeConcDist','timeConcDist2','effluxList','timeLine','sitesC','sitesC2', 'sitesCa','totNutConsumption', 'GaseousEffluxMicrobes', 'Mumean','dataPoints', 'totalNutri','exposedHours','Lp','m','n','numberOFP','numberOFN','averageT','depthList','dt','plottt','examineT', 'depthList','alphaMatrix','GaseousEffluxMicrobes','InvasedIsland','waterVolume','gasVolume','averageT', 'amplitudeT', 'attenuationRate', 'MaximumIncidence','iniConcentrationGas','sitesCg');
         end
-        
+       
         for i = 1:numberOFN
             sitesN{i,1} = waterVolume.*sitesC{i,1};
             if i < 8
@@ -464,12 +259,20 @@ for examineT = 1:dataPoints
             end
         end
         
+        %% Reset Environmental conditions (Light and temperature -> growth rate accordingly)
+        intensityProfile = diag(intensityList(examineT,:))*ones(m,n);
+        MumaxTt(:,:) = diag(MumaxT(examineT,:))*ones(m,n);
+        thetaTC(:,:) = diag(temperatureList(examineT,:))*ones(m,n);
+        
+        pKTotList = zeros(m,n,6); %pK
+        for i = 1:6
+            pKTotList(:,:,i) = diag(pKList(examineT,:,i))*ones(m,n);
+        end
+        
         %calculate the efflux and equilibrisind the gas-liquid phase: mass
         %conserve
-        [efflux2, sitesC, sitesCg, sitesC2] = EquilibriumConcentrationDensity_Domain(waterVolume,gasVolume,sitesC,sitesC2,sitesCg,HenryDomain,InvasedIsland,AlphaM,sitesNEquil,sitesNGEquil,changeN,iniConcentrationGas);
         [efflux, sitesC, sitesCg, sitesC2] = EquilibriumConcentrationDensity(waterVolume,gasVolume,sitesC,sitesC2,sitesCg,HenryDomain,InvasedIsland,AlphaM,sitesNEquil,sitesNGEquil,changeN);
         effluxList(examineT,:) = effluxList(examineT,:) + efflux;% + sum(sum((timeConcDist{1,2}(:,:,examineT)-sitesCg{1,1}.*gasVolume.*InvasedIsland)));
-        effluxList2(examineT,:) = effluxList2(examineT,:) + efflux2;% + sum(sum((timeConcDist{1,2}(:,:,examineT)-sitesCg{1,1}.*gasVolume.*InvasedIsland)));
         
         gradApparent = cell(numberOFP,2);
         possibleDist = cell(numberOFP,2);
@@ -491,7 +294,9 @@ for examineT = 1:dataPoints
         maxNindiv = size(walkerHist,2);
         walkerHistTemp = cell(1,maxNindiv);
         nIndv = 0;
+        
         PopulationS = 0*PopulationS;
+        
         dormPopulationS = 0*dormPopulationS;
         testV = 0*testV;
         testVinactive = 0*testVinactive;
@@ -545,8 +350,8 @@ for examineT = 1:dataPoints
             end
         end
         
-        %% Occupation density is included considering the physical volume limitation
         OccuationDensity = (PopulationS+dormPopulationS)./MaxCapacityPop;
+        
         HighDensityPatch = (OccuationDensity>1).*OccuationDensity + (OccuationDensity<=1).*ones(m,n);
         numberOfWalkers = nIndv;
         clear walkerHist;
@@ -579,24 +384,21 @@ for examineT = 1:dataPoints
         end
         
         %% Water might be not enough for the photosynthesis: Then shutdown photosynthesis
-        reactionCwater = abs(reactionC(:,:,10)).*(reactionC(:,:,10)<0);
-        %% degradation of cell lysis also requires water: for drying case,lack of water slows down the degradation process
-        reactionCwater = reactionCwater - (sitesCI(:,:,1)*YDecay(1,10) + sitesCI(:,:,2)*YDecay(2,10)).*waterVolume;
-        WaterShortage = (reactionCwater<waterVolume*10^(3)).*(1-reactionCwater./waterVolume*10^(-3)); %change in water volume larger than 0.1% than, consider it as water shortage.
         
+        %reactionCwater = abs(reactionC(:,:,10)).*(reactionC(:,:,10)<0);
+        %WaterShortage = (reactionCwater<waterVolume*10^(3)).*(1-reactionCwater./waterVolume*10^(-3)); %change in water volume larger than 0.1% than, consider it as water shortage.
         
         % reevaluate photogrowth term based on water shortage
-        for i = 1:4
-            apparentGrowth(:,:,i) = WaterShortage.*apparentGrowth(:,:,i);
-        end
+        %for i = 1:4
+        %    apparentGrowth(:,:,i) = WaterShortage.*apparentGrowth(:,:,i);
+        %end
+        
         % Nitrite oxidiser also requires water
-        apparentGrowth(:,:,8) = WaterShortage.*apparentGrowth(:,:,8);
-        
-        
+        %apparentGrowth(:,:,8) = WaterShortage.*apparentGrowth(:,:,8);
+       
         totalGrowthMass = apparentGrowth.*testV*rho;
         RespiGrowthMass = respiGrowthR.*testV*rho;
-        
-        
+               
         % Water contents dependent EPS production rate:: EPS fraction
         HydroEPSM = EPSfraction./(1+exp((sitesC2{1}-EPSCcrit)./(EPSCcrit*LocalWaterContents)));
         
@@ -604,12 +406,12 @@ for examineT = 1:dataPoints
             for x = 1:n
                 if isempty(PopulationMapS{y,x}) == 0
                     for i = 1:4
-                        YmaxCandN(:,i) = (1-CNratioX(y,x,i))*Ymax(:,i)+CNratioX(y,x,i)*YN2fix';
+                        YmaxCandN(:,i) = (1-CNratioX(y,x,i))*Ymax(:,i)+CNratioX(y,x,i)*YN2fix';                   
                     end
                     temp = zeros(numberOFP,1);
                     temp(:) = totalGrowthMass(y,x,:);
                     reactionC(y,x,:) = YmaxCandN*temp;
-                    reactionCEPS(y,x) = HydroEPSM(y,x)*YmaxCandN(4,1:4)*temp(1:4);
+                    reactionCEPS(y,x) = HydroEPSM(y,x)*YmaxCandN(4,1:4)*temp(1:4);    
                     temp(:) = RespiGrowthMass(y,x,:);
                     reactionC(y,x,:) = reactionC(y,x,:) + reshape(YrespiTot*temp,[1,1,11]);
                 else
@@ -619,7 +421,7 @@ for examineT = 1:dataPoints
         end
         
         reactionC(:,:,4) = reactionC(:,:,4)-reactionCEPS;
-        
+      
         diffMatrix = 0*diffMatrix;
         diffMatrix(:,:,1) = DiffusionList(1).*Aqdiff.*max(exp(-0.02*(sitesC2{1}/1000).^(0.5)),10^(-4));
         diffMatrix(:,:,2) = DiffusionList(2).*Aqdiff.*max(exp(-0.02*(sitesC2{1}/1000).^(0.5)),10^(-4));
@@ -629,13 +431,13 @@ for examineT = 1:dataPoints
         diffMatrix(:,:,6) = DiffusionList(6).*Aqdiff.*max(exp(-0.02*(sitesC2{1}/1000).^(0.5)),10^(-4));
         diffMatrix(:,:,7) = DiffusionList(7).*Aqdiff.*max(exp(-0.02*(sitesC2{1}/1000).^(0.5)),10^(-4));
         diffMatrix(:,:,8) = DiffusionList(8).*Aqdiff.*max(exp(-0.02*(sitesC2{1}/1000).^(0.5)),10^(-4));
-        
+      
         parfor i = 1:8
             switch i
                 case 1 %O2
-                    Diffresult{i} = DiffusionProcess_aq_gas_Invase(diffMatrix(:,:,i),waterFilm,waterVolume,gasVolume,sitesC{i}(:,:),sitesCg{i}(:,:),HenryDomain{i}(:,:),reactionC(:,:,i),InvasedIsland,sitesNEquil{i}(:,:),sitesNGEquil{i}(:,:),AlphaM{i}(:,:),listE,Lp,dt,testMinT);
+                    Diffresult{i} = DiffusionProcess_aq_gas(diffMatrix(:,:,i),waterFilm,waterVolume,gasVolume,sitesC{i}(:,:),sitesCg{i}(:,:),HenryDomain{i}(:,:),reactionC(:,:,i),InvasedIsland,sitesNEquil{i}(:,:),sitesNGEquil{i}(:,:),AlphaM{i}(:,:),listE,Lp,dt,testMinT, reducedLevelC);
                 case 2 %CO2
-                    Diffresult{i} = DiffusionProcess_aq_gas_Invase(diffMatrix(:,:,i),waterFilm,waterVolume,gasVolume,sitesC{i}(:,:),sitesCg{i}(:,:),HenryDomain{i}(:,:),reactionC(:,:,i),InvasedIsland,sitesNEquil{i}(:,:),sitesNGEquil{i}(:,:),AlphaM{i}(:,:),listE,Lp,dt,testMinT);
+                    Diffresult{i} = DiffusionProcess_aq_gas(diffMatrix(:,:,i),waterFilm,waterVolume,gasVolume,sitesC{i}(:,:),sitesCg{i}(:,:),HenryDomain{i}(:,:),reactionC(:,:,i),InvasedIsland,sitesNEquil{i}(:,:),sitesNGEquil{i}(:,:),AlphaM{i}(:,:),listE,Lp,dt,testMinT, reducedLevelC);
                 case 3 %HCO3-
                     Diffresult{i} = DiffusionProcess_aq(diffMatrix(:,:,i),waterFilm,waterVolume,sitesC{i}(:,:),reactionC(:,:,i),listE,Lp,dt,testMinT);
                 case 4 %CH2O
@@ -647,7 +449,7 @@ for examineT = 1:dataPoints
                 case 7 %NO2-
                     Diffresult{i} = DiffusionProcess_aq(diffMatrix(:,:,i),waterFilm,waterVolume,sitesC{i}(:,:),reactionC(:,:,i),listE,Lp,dt,testMinT);
                 case 8 %N2O
-                    Diffresult{i} = DiffusionProcess_aq_gas_Invase(diffMatrix(:,:,i),waterFilm,waterVolume,gasVolume,sitesC{i}(:,:),sitesCg{i}(:,:),HenryDomain{i}(:,:),reactionC(:,:,i),InvasedIsland,sitesNEquil{i}(:,:),sitesNGEquil{i}(:,:),AlphaM{i}(:,:),listE,Lp,dt,testMinT);
+                    Diffresult{i} = DiffusionProcess_aq_gas(diffMatrix(:,:,i),waterFilm,waterVolume,gasVolume,sitesC{i}(:,:),sitesCg{i}(:,:),HenryDomain{i}(:,:),reactionC(:,:,i),InvasedIsland,sitesNEquil{i}(:,:),sitesNGEquil{i}(:,:),AlphaM{i}(:,:),listE,Lp,dt,testMinT, reducedLevelC);
             end
         end
         
@@ -665,9 +467,9 @@ for examineT = 1:dataPoints
                 case 2 %CO32-
                     Diffresult2{i} = DiffusionProcess_aq(diffMatrix2(:,:,i),waterFilm,waterVolume,sitesC2{i}(:,:),zeros(m,n),listE,Lp,dt,testMinT);
                 case 3 %NH3
-                    Diffresult2{i} = DiffusionProcess_aq_gas_Invase(diffMatrix2(:,:,i),waterFilm,waterVolume,gasVolume,sitesC2{i}(:,:),sitesCg{6}(:,:),HenryDomain{6}(:,:),zeros(m,n),InvasedIsland,sitesNEquil{6}(:,:),sitesNGEquil{6}(:,:),AlphaM{6}(:,:),listE,Lp,dt,testMinT);
+                    Diffresult2{i} = DiffusionProcess_aq_gas(diffMatrix2(:,:,i),waterFilm,waterVolume,gasVolume,sitesC2{i}(:,:),sitesCg{6}(:,:),HenryDomain{6}(:,:),zeros(m,n),InvasedIsland,sitesNEquil{6}(:,:),sitesNGEquil{6}(:,:),AlphaM{6}(:,:),listE,Lp,dt,testMinT, reducedLevelC);
                 case 4 %HONO
-                    Diffresult2{i} = DiffusionProcess_aq_gas_Invase(diffMatrix2(:,:,i),waterFilm,waterVolume,gasVolume,sitesC2{6}(:,:),sitesCg{7}(:,:),HenryDomain{7}(:,:),zeros(m,n),InvasedIsland,sitesNEquil{7}(:,:),sitesNGEquil{7}(:,:),AlphaM{7}(:,:),listE,Lp,dt,testMinT);
+                    Diffresult2{i} = DiffusionProcess_aq_gas(diffMatrix2(:,:,i),waterFilm,waterVolume,gasVolume,sitesC2{6}(:,:),sitesCg{7}(:,:),HenryDomain{7}(:,:),zeros(m,n),InvasedIsland,sitesNEquil{7}(:,:),sitesNGEquil{7}(:,:),AlphaM{7}(:,:),listE,Lp,dt,testMinT, reducedLevelC);
                 case 5 %Ca
                     Diffresult2{i} = DiffusionProcess_aq(diffMatrix2(:,:,i),waterFilm,waterVolume,sitesC2{7}(:,:),zeros(m,n),listE,Lp,dt,testMinT);
             end
@@ -691,14 +493,14 @@ for examineT = 1:dataPoints
         
         
         %% Bubbles escape when the built up partial pressure of gasous elements are larger than the fraction P_a
-        
+              
         temp = pN2endOthers*ones(m,n);
         for iG = 1:length(ListGas)
             gI = ListGas(iG);
             if gI == 6
-                temp = temp + sitesC2{3}./HenryDomain{gI}./rhoAir; %Partial pressure divided by the atmpspheric pressure
-            else if gI == 7
-                    temp = temp + sitesC2{4}./HenryDomain{gI}./rhoAir;
+                temp = temp + sitesC2{3}./HenryDomain{gI}./rhoAir; %Partial pressure divided by the atmpspheric pressure              
+            else if gI == 7                    
+                    temp = temp + sitesC2{4}./HenryDomain{gI}./rhoAir;                    
                 else
                     temp = temp + sitesC{gI}./HenryDomain{gI}./rhoAir;  %temp = total partial pressure including all the gaseous elements
                 end
@@ -710,25 +512,22 @@ for examineT = 1:dataPoints
             if gI == 6
                 sitesCtemp = (temp > P_a).*sitesNEquil{gI} + (temp <= P_a).*sitesC2{3};
                 totNgBubble(:,:,gI) = totNgBubble(:,:,gI) + (sitesC2{3} - sitesCtemp).*waterVolume;
-                sitesC2{3} = sitesCtemp;
-            else if gI == 7
-                    sitesCtemp = (temp > P_a).*sitesNEquil{gI} + (temp <= P_a).*sitesC2{4};
+                sitesC2{3} = sitesCtemp;                
+            else if gI == 7                    
+                    sitesCtemp = (temp > P_a).*sitesNEquil{gI} + (temp <= P_a).*sitesC2{4};                    
                     totNgBubble(:,:,gI) = totNgBubble(:,:,gI) + (sitesC2{4} - sitesCtemp).*waterVolume;
                     sitesC2{4} = sitesCtemp;
                 else
                     sitesCtemp = (temp > P_a).*sitesNEquil{gI} + (temp <= P_a).*sitesC{gI};
-                    totNgBubble(:,:,gI) = totNgBubble(:,:,gI) + (sitesC{gI} - sitesCtemp).*waterVolume;
+                    totNgBubble(:,:,gI) = totNgBubble(:,:,gI) + (sitesC{gI} - sitesCtemp).*waterVolume;                    
                     sitesC{gI} = sitesCtemp;
                 end
             end
             
         end
-        
+            
         %% calcualting new growth rate based on nutshare: nutrient limitation
         if min(nutShare(:))~=1
-            %limitF1 = min(nutShare(:))
-            %limitF2 = max(nutShare(:))
-            %DeltaT
             %Effect of pH applies to the next time step: Here only mass
             %share is applied
             [apparentGrowth(:,:,1:4),respiGrowthR] = PhotoGrowthShare(sitesC, sitesC2,MumaxTt,intensityProfile,nutShare);
@@ -736,12 +535,13 @@ for examineT = 1:dataPoints
         end
         
         % reevaluate photogrowth term based on water shortage
-        for i = 1:4
-            apparentGrowth(:,:,i) = WaterShortage.*apparentGrowth(:,:,i);
-        end
+        %for i = 1:4
+        %    apparentGrowth(:,:,i) = WaterShortage.*apparentGrowth(:,:,i);
+        %end
         
         % Nitrite oxidiser also requires water
-        apparentGrowth(:,:,8) = WaterShortage.*apparentGrowth(:,:,8);
+        %apparentGrowth(:,:,8) = WaterShortage.*apparentGrowth(:,:,8);
+       
         totalGrowth = apparentGrowth + respiGrowthR;
         
         %% Update possible displacement and ju mping probability based on the grwoth rate field
@@ -750,10 +550,10 @@ for examineT = 1:dataPoints
             [possibleDist{i,1}, jumpTProbM{i,1}] = MicrobeExpMobParBioCrustSpaceConstrain(HighDensityPatch,(PopulationMovie0(:,:,i)>0).*microbeVelocityM, normWater, gradApparent{i,1}, perShare);
         end
         
-        %% Update individuals based on spatial information
-        
+        %% Update individuals based on spatial information       
         muSp = 0*muSp;
         %% Update individuals based on spatial information
+        muSp = zeros(m,n,numberOFP);
         for y = 1:m
             for x = 1:n
                 if isempty(PopulationMapS{y,x}) == 0
@@ -826,21 +626,20 @@ for examineT = 1:dataPoints
         
         for ii =1:6 %feedback to carbohydrates and ammonium / certain changes in biocarbonate
             for i = 1:2
-                sitesC{ii}(:,:) = sitesC{ii}(:,:) +YDecay(i,ii)*sitesCI(:,:,i).*(1-exp(-decayRate(i)*DeltaT*WaterShortage));
+                sitesC{ii}(:,:) = sitesC{ii}(:,:) +YDecay(i,ii)*sitesCI(:,:,i)*(1-exp(-decayRate(i)*DeltaT));
             end
         end
         
         for i = 1:2
-            sitesCI(:,:,i) = sitesCI(:,:,i).*exp(-decayRate(i)*DeltaT*WaterShortage);
+            sitesCI(:,:,i) = sitesCI(:,:,i)*exp(-decayRate(i)*DeltaT);
         end
         
         %EPS degradation as a function of concentration of surrounding sugar? sitesC2{1}*exp(-decayRate(i)*DeltaT);
         % Hydrolysis of EPS
-        HydrolysisEPS = sitesC2{1}.*(1-exp(-decayRate(3)*DeltaT*sitesC2{1}.*WaterShortage./EPSCcrit));
+        HydrolysisEPS = sitesC2{1}.*(1-exp(-decayRate(3)*DeltaT*sitesC2{1}./EPSCcrit));
         sitesC2{1} = sitesC2{1} - HydrolysisEPS;
         sitesC{4} = sitesC{4} + HydrolysisEPS;
-        
-        
+                
         %% New borns
         mothers = find(tempL);
         if isempty(mothers) == 0
@@ -864,12 +663,8 @@ for examineT = 1:dataPoints
             dormpopWalkersPart(tt,i) = sum(sum(dormPopulationMovie{i,tt}(:,:)));
             muList{i}(:,:,tt) = muList{i}(:,:,tt)./popWalkersPart(tt,i);
         end
-        
-        
-        
+                
         %% Partition inorganic carbon following pH
-        %sitesC = sitesCtemp;
-        %sitesC2 = sitesC2temp;
         sitesC2t = sitesC{2};
         sitesC3 = sitesC{3};
         sitesC5 = sitesC{5};
@@ -881,7 +676,7 @@ for examineT = 1:dataPoints
         sitesC25 = sitesC2{5};
         sitesC26 = sitesC2{6};
         sitesC27 = sitesC2{7};
-        sitesCaTemp = sitesCa;
+        sitesCaTemp = sitesCa;       
         parfor iInd = 1:m
             [C2t, C3, C5, C6, C7, C22, C23, C24, C25, C26, C27, CaTemp] = PHestimationMex(sitesC2t(iInd,:),sitesC3(iInd,:), sitesC5(iInd,:), sitesC6(iInd,:),sitesC7(iInd,:), sitesC22(iInd,:),sitesC23(iInd,:), sitesC24(iInd,:),sitesC25(iInd,:),sitesC26(iInd,:),sitesC27(iInd,:), sitesCaTemp(iInd,:,:), DeltaT, ZionM(iInd,:),pKTotList,thetaTC);
             sitesC2t(iInd,:) = C2t;
@@ -896,7 +691,7 @@ for examineT = 1:dataPoints
             sitesC26(iInd,:) = C26;
             sitesC27(iInd,:) = C27;
             sitesCaTemp(iInd,:,:) = CaTemp;
-        end
+        end       
         sitesC{2} = sitesC2t;
         sitesC{3} = sitesC3;
         sitesC{5} = sitesC5;
@@ -952,13 +747,6 @@ for examineT = 1:dataPoints
     
     timeConcDist2{8}(:,:,examineT) = sitesCa(:,:,1);
     timeConcDist2{9}(:,:,examineT) = sitesCa(:,:,2);
-    
-    sitesCaN1 = sitesCa(:,:,1).*waterVolume;
-    sitesCaN2 = sitesCa(:,:,2).*waterVolume;
-    
-    if examineT == preDryHlist %drying steady state save
-        save(strcat('./',serial_id_new,'/',serial_idtemp,'/','Dry_steady.mat'),'-v7.3');
-    end
     
     
 end
