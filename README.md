@@ -8,9 +8,9 @@ The main difference to the Main_BSC_biogeoscience.m is the dynamic update of hyd
 
 ## Usage
 
-STEP 0. MATLAB Installation 
+# STEP 0. MATLAB Installation 
 
-STEP 1. Inoculation of microbial cells at field capacity (-3kPa) 
+# STEP 1. Inoculation of microbial cells at field capacity (-3kPa) 
 
 Excute Main_BSC_biogeoscience.m and obtain the stabilised microbial community.  
 For this, you need four input arguments;
@@ -31,9 +31,10 @@ Once the simulation is completed, there will be numtiple mat files in the folder
 
 Parameters.mat (physical domain, chemical parameters, and biological parameters will be saved here)
 HTBioCrustCNcycleHour##.mat (intermediate results, that are saved with 12 hours interval:: only saves essential, population distribution, concentraiton of chemical compounds, etc.) 
-Final.mat (The final result with all parameters to continue the simulation under different conditions)
+Final.mat (The final result with all parameters to continue the simulation under different conditions:: about 1.5~2G depending on microbial population size)
 
-STEP 2. Microbial activity at fully saturated condtions
+# STEP 2. Microbial activity at fully saturated condtions
+
 Once STEP1 is done, the simulation will continue for wetting of the domain by excuting following:
 ~~~~~~~~~~~~~{.m}
 examineDay = 5; 
@@ -46,16 +47,27 @@ examineDay2 = 5; %How many days to immerse the soil system in water?
 Main_BSC_immerse(lightOn,examineDay,examineDay2 pot1, plottt, indexS)
 ~~~~~~~~~~~~~
 
-STEP 3, Incubation of the dry domain under darkness and apply a wetting-drying cycle
+# STEP 3, Incubation of the dry domain under darkness and apply a wetting-drying cycle
 ~~~~~~~~~~~~~{.m}
+NH3ppb = 5; %atmospheric level of NH3 in ppb
+HONOppb = 1; %atmospheric level of HONO in ppb
+desiccationIndex = 4; %pre-calcuated drying patterns
+newT = 25; %changing ambient temperature is also possible (degree celcius)
 examineDay = 5; 
 pot1 = 3; % at field capcity
-plottt = 5; 
 indexS = 0;
-Main_BSC_incubation_dark_dry(examineDay, pot1, plottt, indexS)
+Main_BSC_wet_dry(NH3ppb, HONOppb,desiccationIndex, newT, examineDay, pot1, indexS)
 ~~~~~~~~~~~~~
 
-STEP 4, Post processing of results 
+# STEP 4, Post processing of results 
+~~~~~~~~~~~~~{.m}
+hono = 1;
+nh3 = 20;
+desiccationIndex = 4;
+newT = 25;
+numberOfSamples = 8; % number of simulations under 1 boundary conditions
+Process_results(hono, nh3,desiccationIndex,newT,numberOfSamples)
+~~~~~~~~~~~~~
 
 
 ## Note
