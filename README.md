@@ -8,9 +8,9 @@ The main difference to the Main_BSC_biogeoscience.m is the dynamic update of hyd
 
 ## Usage
 
-# STEP 0. MATLAB Installation 
+### STEP 0. MATLAB Installation 
 
-# STEP 1. Inoculation of microbial cells at field capacity (-3kPa) 
+### STEP 1. Inoculation of microbial cells at field capacity (-3kPa) 
 
 Excute Main_BSC_biogeoscience.m and obtain the stabilised microbial community.  
 For this, you need four input arguments;
@@ -33,7 +33,7 @@ Parameters.mat (physical domain, chemical parameters, and biological parameters 
 HTBioCrustCNcycleHour##.mat (intermediate results, that are saved with 12 hours interval:: only saves essential, population distribution, concentraiton of chemical compounds, etc.) 
 Final.mat (The final result with all parameters to continue the simulation under different conditions:: about 1.5~2G depending on microbial population size)
 
-# STEP 2. Microbial activity at fully saturated condtions
+### STEP 2. Microbial activity at fully saturated condtions
 
 Once STEP1 is done, the simulation will continue for wetting of the domain by excuting following:
 ~~~~~~~~~~~~~{.m}
@@ -47,7 +47,7 @@ examineDay2 = 5; %How many days to immerse the soil system in water?
 Main_BSC_immerse(lightOn,examineDay,examineDay2 pot1, plottt, indexS)
 ~~~~~~~~~~~~~
 
-# STEP 3, Incubation of the dry domain under darkness and apply a wetting-drying cycle
+### STEP 3, Incubation of the dry domain under darkness and apply a wetting-drying cycle
 ~~~~~~~~~~~~~{.m}
 NH3ppb = 5; %atmospheric level of NH3 in ppb
 HONOppb = 1; %atmospheric level of HONO in ppb
@@ -59,7 +59,7 @@ indexS = 0;
 Main_BSC_wet_dry(NH3ppb, HONOppb,desiccationIndex, newT, examineDay, pot1, indexS)
 ~~~~~~~~~~~~~
 
-# STEP 4, Post processing of results 
+### STEP 4, Post processing of results 
 ~~~~~~~~~~~~~{.m}
 hono = 1;
 nh3 = 20;
