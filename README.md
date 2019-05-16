@@ -8,6 +8,8 @@ The main difference to the Main_BSC_biogeoscience.m is the dynamic update of hyd
 
 ## Usage
 
+STEP 0. MATLAB Installation 
+
 STEP 1. Inoculation of microbial cells at field capacity (-3kPa) 
 
 Excute Main_BSC_biogeoscience.m and obtain the stabilised microbial community.  
@@ -40,11 +42,13 @@ STEP 5, Post processing of results
 
 1. The DBM is computationally very expensive and rather slow on local desktops. For instance, using 32 cores in a computing cluster requires 4-5 days to complete a single simulation from STEP 1 to STEP 5
 
-2. The main code includes mex files that are complied for Mac and Linux systems (tested on MATLAB 2018a)
+2. The main code includes mex files that are complied for Mac and Linux systems only (tested on MATLAB 2018a)
+
+
 
 ## Reference
 
 [1] Kim, M. and Or, D.: Hydration status and diurnal trophic interactions shape microbial community function in desert biocrusts, Biogeosciences, 14, 5403-5424, https://doi.org/10.5194/bg-14-5403-2017, 2017.
 
-[2] Kim, M. and Or, D.: Microscale pH variations in soils affect HONO and NH3 emissions during drying, in review, 2019.
+[2] Kim, M. and Or, D.: Microscale pH variations in drying soils and desert biocrusts affect HONO and NH3 emissions, in review, 2019.
 
