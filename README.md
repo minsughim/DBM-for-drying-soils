@@ -9,10 +9,11 @@ The main difference to the Main_BSC_biogeoscience.m is the dynamic update of hyd
 ## Usage
 
 STEP 1. Inoculation of microbial cells at field capacity (-3kPa) 
+
 Excute Main_BSC_biogeoscience.m and obtain the stabilised microbial community.  
 For this, you need four input arguments;
 1. Time for the dynamics (examineDays)
-2. matric potentail for unsaturated soils (pot1, with the unit of [-kPa])
+2. matric potential for unsaturated soils (pot1, with the unit of [-kPa])
 3. time interval for output (plottt, with the unit of mins.)
 4. index for ensemble averages (indexS, any integer to indicate a simulation)
 For example, to get the results of 5 days of simulation with output for every 5 mins at the matric potential of -3kPa, you excute in Matlab
