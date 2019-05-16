@@ -33,12 +33,14 @@ STEP 3, 'Incubation' of the system under dark and dry condition
 STEP 4, Apply a wetting-drying cycle
 
 
+STEP 5, Post processing of results 
+
 
 ## Note
 
-1. The DBM is computationally very expensive and rather slow on local desktops. For instance, using 32 cores in a computing cluster requires 4-5 days to complete a single simulation from STEP 1 to STEP4
+1. The DBM is computationally very expensive and rather slow on local desktops. For instance, using 32 cores in a computing cluster requires 4-5 days to complete a single simulation from STEP 1 to STEP 5
 
-2. The main code include mex files that are complied for Mac and Linux systems (tested on MATLAB 2018a)
+2. The main code includes mex files that are complied for Mac and Linux systems (tested on MATLAB 2018a)
 
 ## Reference
 
