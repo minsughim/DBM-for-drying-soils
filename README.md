@@ -12,7 +12,7 @@ The main difference to the Main_BSC_biogeoscience.m is the dynamic update of hyd
 
 ### STEP 1. Inoculation of microbial cells at field capacity (-3kPa) 
 
-Excute Main_BSC_biogeoscience.m and obtain the stabilised microbial community.  
+Excute Main_BSC_biogeoscience.m and obtain the stabilised microbial community at field capacity.  
 For this, you need four input arguments;
 1. Time for the dynamics (examineDays)
 2. matric potential for unsaturated soils (pot1, with the unit of [-kPa])
