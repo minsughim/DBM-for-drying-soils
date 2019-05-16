@@ -26,23 +26,43 @@ plottt = 5;
 indexS = 0;
 Main_BSC_biogeoscience(examineDay, pot1, plottt, indexS)
 ~~~~~~~~~~~~~
+This code will generate a folder named "HT_BSC_Day5_Pot3.0_index0". 
+Once the simulation is completed, there will be numtiple mat files in the folder, indluding:
+
+Parameters.mat (physical domain, chemical parameters, and biological parameters will be saved here)
+HTBioCrustCNcycleHour##.mat (intermediate results, that are saved with 12 hours interval:: only saves essential, population distribution, concentraiton of chemical compounds, etc.) 
+Final.mat (The final result with all parameters to continue the simulation under different conditions)
+
 STEP 2. Microbial activity at fully saturated condtions
+Once STEP1 is done, the simulation will continue for wetting of the domain by excuting following:
+~~~~~~~~~~~~~{.m}
+examineDay = 5; 
+pot1 = 3; % at field capcity
+plottt = 5; 
+indexS = 0;
 
+lightOn = 2; % 0 for complete darkness, 1 for constant light condition, any other numbers are for simulating diurnal cycles
+examineDay2 = 5; %How many days to immerse the soil system in water?
+Main_BSC_immerse(lightOn,examineDay,examineDay2 pot1, plottt, indexS)
+~~~~~~~~~~~~~
 
-STEP 3, 'Incubation' of the system under dark and dry condition
+STEP 3, Incubation of the dry domain under darkness and apply a wetting-drying cycle
+~~~~~~~~~~~~~{.m}
+examineDay = 5; 
+pot1 = 3; % at field capcity
+plottt = 5; 
+indexS = 0;
+Main_BSC_incubation_dark_dry(examineDay, pot1, plottt, indexS)
+~~~~~~~~~~~~~
 
-
-STEP 4, Apply a wetting-drying cycle
-
-
-STEP 5, Post processing of results 
+STEP 4, Post processing of results 
 
 
 ## Note
 
-1. The DBM is computationally very expensive and rather slow on local desktops. For instance, using 32 cores in a computing cluster requires 4-5 days to complete a single simulation from STEP 1 to STEP 5
+1. The DBM is computationally very expensive and rather slow on local desktops. For instance, using 32 cores in a computing cluster requires 4-5 days to complete a single simulation from STEP 1 to STEP 4
 
-2. The main code includes mex files that are complied for Mac and Linux systems only (tested on MATLAB 2018a)
+2. The main code includes mex files that are complied for Mac and Linux systems only (tested on MATLAB 2017b (9.3.0.713579) 64-bit)
 
 
 
