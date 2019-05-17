@@ -37,7 +37,11 @@ Final.mat (The final result with all parameters to continue the simulation under
 
 ### STEP 2. Microbial activity at fully saturated condtions
 
-Once STEP1 is done, the simulation will continue for wetting of the domain by excuting following:
+Once STEP1 is done, the simulation will continue for wetting of the domain by excuting following with two new input parameters:
+For this, you need four input arguments;
+1. switch on and off the light conditions: There are three possbilities, complete darkness, constant light condition, and diurnal cycle
+2. Time for dynamics under fully saturated conditions
+
 ~~~~~~~~~~~~~{.m}
 examineDay = 5; 
 pot1 = 3; % at field capcity
@@ -49,11 +53,20 @@ examineDay2 = 5; %How many days to immerse the soil system in water?
 Main_BSC_immerse(lightOn,examineDay,examineDay2 pot1, plottt, indexS)
 ~~~~~~~~~~~~~
 
+We note that the primary results up to STEP 2 are published in [1].
+
 ### STEP 3, Incubation of the dry domain under darkness and apply a wetting-drying cycle
+The work of [2] is related to this STEP, drying and incubating and wetting of the soil system (biocrusts). 
+Here 4 more inputs can be applied to change the boudnary conditions:
+1. mixing ratio of NH3 in ppb
+2. mixing ratio of HONO in ppb
+3. drying patterns (Pre-calculated matric potential changes with 13 different rates are given in desiccation_biocrst.mat)
+4. temperature (in this work, the effect of temperature was not explored, but possible in the model).
+
 ~~~~~~~~~~~~~{.m}
 NH3ppb = 5; %atmospheric level of NH3 in ppb
 HONOppb = 1; %atmospheric level of HONO in ppb
-desiccationIndex = 4; %pre-calcuated drying patterns
+desiccationIndex = 4; %pre-calcuated drying patterns for 24 hours duration (should be integer between 1 and 13)
 newT = 25; %changing ambient temperature is also possible (degree celcius)
 examineDay = 5; 
 pot1 = 3; % at field capcity
