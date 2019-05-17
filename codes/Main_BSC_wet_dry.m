@@ -81,7 +81,7 @@ DeltaT = dt;
 preDryHlist = TinitalD/plottt;
 dryPot = 50;
 DryHlist = Td/plottt;
-load('Dessication_Biocrust.mat', 'potListTotal')
+load('Desiccation_Biocrust.mat', 'potListTotal')
 potList(1:DryHlist) = potListTotal(:,desiccationIndex);
 %potList = linspace(0.5,30,dataPoints);
 %desiccationLevel = drypot2;
