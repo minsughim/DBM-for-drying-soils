@@ -84,10 +84,35 @@ numberOfSamples = 8; % number of simulations under 1 boundary conditions
 Process_results(hono, nh3,desiccationIndex,newT,numberOfSamples)
 ~~~~~~~~~~~~~
 
+### Example model excution
+To simulate a biocrust under p[HONO] = 1ppb, p[NH3] = 5ppb, at 25 degree celcius with the slow drying (presented in Figure 6 in [2]), you can run Matlab with the following command
+
+
+~~~~~~~~~~~~~{.m}
+examineDay = 5; 
+pot1 = 3; % at field capcity
+plottt = 5; % write dynamics every 5 mins.
+indexS = 0;
+numberOfSamples = 8;
+for indexS = 0:numberOfSamples
+  Main_BSC_biogeoscience(examineDay, pot1, plottt, indexS)
+  lightOn = 2; % 0 for complete darkness, 1 for constant light condition, any other numbers are for simulating diurnal cycles
+  examineDay2 = 5; %How many days to immerse the soil system in water?
+  Main_BSC_immerse(lightOn,examineDay,examineDay2 pot1, plottt, indexS)
+  NH3ppb = 5; %atmospheric level of NH3 in ppb
+  HONOppb = 1; %atmospheric level of HONO in ppb
+  desiccationIndex = 4; %pre-calcuated drying patterns for 24 hours duration (should be integer between 1 and 13)
+  newT = 25; %changing ambient temperature is also possible (degree celcius)
+  Main_BSC_wet_dry(NH3ppb, HONOppb,desiccationIndex, newT, examineDay, pot1, indexS)
+end
+
+Process_results(HONOppb, NH3ppb,desiccationIndex,newT,numberOfSamples)
+~~~~~~~~~~~~~
+The final result file will be created with the name 'HT_BSC_newT25_NH35_HONO1_Drying4.mat' (about 700MB) with all variables, population sizes and distribution, concentrations of chemical compunds, gaseous efflux of CO2, O2, HONO, NH3, and N2O, and, of course the dynamics of the local pH distribution in the soil domain. 
 
 ## Note
 
-1. The DBM is computationally very expensive and rather slow on local desktops. For instance, using 32 cores in a computing cluster requires 4-5 days to complete a single simulation from STEP 1 to STEP 4
+1. The DBM is computationally very expensive and rather slow on local desktops. For instance, using 32 cores in a computing cluster requires 4-5 days to complete a single simulation from STEP 1 to STEP 3
 
 2. The main code includes mex files that are complied for Mac and Linux systems only (tested on MATLAB 2017b (9.3.0.713579) 64-bit)
 
