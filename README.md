@@ -1,4 +1,6 @@
 # DBM-for-drying-soils
+![alt text](https://github.com/minsughim/DBM-for-drying-soils/blob/master/schematics_DBM_pH.PNG)
+
 This repository includes source codes of the desert biocrust model (DBM) under dynamic hydration conditions.
 This work is a continuation of the DBM at a static hydration condition [1]. You can find the main codes of this work at https://github.com/minsughim/DBM--Biogeoscience. To excute this model, follow the instruction there and excute the main code, Main_BSC_biogeoscience.m. 
 
