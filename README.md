@@ -1,4 +1,4 @@
-# DBM-for-drying-soils
+# Mechanistic model of desert biological soil crusts under dynamic hydratin conditions
 ![alt text](https://github.com/minsughim/DBM-for-drying-soils/blob/master/schematics_DBM_pH.PNG)
 
 This repository includes source codes of the desert biocrust model (DBM) under dynamic hydration conditions.
